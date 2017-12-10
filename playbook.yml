@@ -1,0 +1,56 @@
+---
+# Playbook to create Development Environment
+
+- hosts: localhost
+  #become: true
+  #become_user: root
+  #become_method: sudo
+  vars:
+      home: /home/kuranai
+      document_root: /tmp
+      os: ubuntu
+      user: kuranai
+  gather_facts: false
+  pre_tasks:
+      - name: 'install python2'
+        raw: apt-get -y install python-simplejson
+        become: true
+      #- name: Symlink sh to bash rather than dash
+      #  file: src=/bin/bash dest=/bin/sh state=link force=true
+      - name: Update apt cache and optionally upgrade
+        apt:
+          update_cache=yes
+          cache_valid_time=7200
+          upgrade=yes # Uncomment this to force full upgrade!
+        become: true
+      - name: Install stuff from Apt
+        apt: name={{ item }} state=installed
+        with_items:
+         - git
+         - tig
+         - vim-nox
+         - bash-completion # Not included in the docker image
+         - make
+         - htop
+         - tmux
+         - curl
+         - man-db
+        become: true
+      - name: copy dotfiles
+        git: repo=https://github.com/hoeffter/dotfiles.git dest={{ home }}/dotfiles
+      - name: symlink all dotfiles
+        file:
+          src: '{{ home }}/dotfiles/{{ item.src }}'
+          dest: '{{ home }}/{{ item.dest }}'
+          state: link
+        with_items:
+          - { src: '.vimrc', dest: '.vimrc' }
+          - { src: '.zshrc', dest: '.zshrc' }
+          - { src: '.tmux.conf.local', dest: '.tmux.conf.local' }
+      - name: Install vim-plug
+        command: curl -fLo {{ home }}/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+      - name: Install all Vim-Plugins
+        command: vim +'PlugInstall --sync' +qa
+  roles:
+      - { role: golang, become: false }
+      - { role: youcompleteme, sudo: false } # Comment out this to save time!!
