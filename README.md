@@ -9,7 +9,14 @@ Ansible Files to bootstrap my development environment
   
 ```sudo adduser USERNAME sudo```
 
-3. Install Ansible
+3. change user to don't need password for sudo
+
+```
+sudo vim /etc/sudoers
+USERNAME ALL=(ALL) NOPASSWD: ALL
+```
+
+4. Install Ansible
   
 http://docs.ansible.com/ansible/latest/intro_installation.html#latest-releases-via-apt-ubuntu
 
@@ -21,12 +28,12 @@ $ sudo apt-get update
 $ sudo apt-get install ansible
 ```
 
-4. Clone Repo
+5. Clone Repo
 
 ```
 git clone https://github.com/hoeffter/DevEnv.git
 ```
 
-5. Change Variables
+6. Change Variables
 
 Mainly in Playbook.yml
